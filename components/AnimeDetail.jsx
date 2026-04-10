@@ -18,6 +18,7 @@ export default function AnimeDetail({ anime, episodes, characters, recs }) {
   const [cmtText,  setCmtText]  = useState('')
   const [posting,  setPosting]  = useState(false)
   const [epPage,   setEpPage]   = useState(1)
+  const [seasons, setSeasons] = useState([])
 
   const title    = anime.title_english || anime.title
   const image    = anime.images?.jpg?.large_image_url || anime.images?.jpg?.image_url
@@ -28,6 +29,18 @@ export default function AnimeDetail({ anime, episodes, characters, recs }) {
   const totalEpPg= Math.ceil(episodes.length/EPP)
 
   useEffect(() => {
+    // Seasons fetch karo
+    fetch(`https://api.jikan.moe/v4/anime/${anime.mal_id}/relations`)
+      .then(r => r.json())
+      .then(data => {
+        const related = data?.data || []
+        const sequels = related.filter(r =>
+          r.relation === 'Sequel' || r.relation === 'Prequel' || r.relation === 'Alternative version'
+        ).flatMap(r => r.entry || [])
+        setSeasons(sequels)
+      })
+      .catch(() => {})
+
     if (user) {
       checkWatchlist(user.id, anime.mal_id).then(setInWL)
       getMyRating(user.id, String(anime.mal_id)).then(setMyRating)
@@ -178,48 +191,72 @@ export default function AnimeDetail({ anime, episodes, characters, recs }) {
             )}
 
             {/* Episodes */}
-            {tab==='Episodes'&&(
-              <div>
-                {episodes.length===0?(
-                  <div>
-                    <p className="text-shim-muted text-sm mb-4">Episode list unavailable. Use manual navigation:</p>
-                    <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
-                      {Array.from({length:Math.min(anime.episodes||24,100)},(_,i)=>i+1).map(ep=>(
-                        <Link key={ep} href={`/watch/${anime.mal_id}?ep=${ep}`}
-                          className="flex items-center justify-center py-2 rounded-lg text-xs font-medium bg-shim-card border border-shim-border text-shim-textD hover:border-shim-primary hover:text-shim-accent transition-all">
-                          {ep}
+            {tab==='Episodes' && (
+              <>
+                {seasons.length > 0 && (
+                  <div className="mb-6">
+                    <h3 className="text-sm font-semibold text-shim-textD mb-3">Other Seasons</h3>
+                    <div className="flex flex-wrap gap-2">
+                      <Link
+                        href={`/anime/${anime.mal_id}`}
+                        className="px-4 py-2 rounded-lg text-xs font-medium bg-shim-primary text-white"
+                      >
+                        Current Season
+                      </Link>
+                      {seasons.map(s => (
+                        <Link
+                          key={s.mal_id}
+                          href={`/anime/${s.mal_id}`}
+                          className="px-4 py-2 rounded-lg text-xs font-medium bg-shim-card border border-shim-border text-shim-textD hover:border-shim-primary hover:text-shim-accent transition-all"
+                        >
+                          {s.name}
                         </Link>
                       ))}
                     </div>
                   </div>
-                ):(
-                  <>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-5">
-                      {pagedEps.map(ep=>(
-                        <Link key={ep.mal_id} href={`/watch/${anime.mal_id}?ep=${ep.mal_id}`}
-                          className="group flex items-center gap-3 p-3 rounded-xl bg-shim-card border border-shim-border hover:border-shim-primary/50 hover:bg-shim-cardH transition-all">
-                          <div className="w-8 h-8 rounded-lg bg-shim-bgalt flex items-center justify-center text-xs font-bold text-shim-textD group-hover:bg-shim-primary group-hover:text-white transition-all flex-shrink-0">{ep.mal_id}</div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs font-medium text-shim-text group-hover:text-shim-accent transition-colors clamp2">{ep.title||`Episode ${ep.mal_id}`}</p>
-                            {ep.aired&&<p className="text-xs text-shim-muted">{new Date(ep.aired).toLocaleDateString()}</p>}
-                          </div>
-                          {!isPremium&&ep.mal_id>3&&<span className="text-shim-gold text-xs flex-shrink-0">⭐</span>}
-                        </Link>
-                      ))}
-                    </div>
-                    {totalEpPg>1&&(
-                      <div className="flex gap-2 flex-wrap">
-                        {Array.from({length:totalEpPg},(_,i)=>(
-                          <button key={i} onClick={()=>setEpPage(i+1)}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${epPage===i+1?'bg-shim-primary text-white':'bg-shim-card border border-shim-border text-shim-textD hover:border-shim-primary/40'}`}>
-                            {i*EPP+1}–{Math.min((i+1)*EPP,episodes.length)}
-                          </button>
+                )}
+                <div>
+                  {episodes.length===0?(
+                    <div>
+                      <p className="text-shim-muted text-sm mb-4">Episode list unavailable. Use manual navigation:</p>
+                      <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
+                        {Array.from({length:Math.min(anime.episodes||24,100)},(_,i)=>i+1).map(ep=>(
+                          <Link key={ep} href={`/watch/${anime.mal_id}?ep=${ep}`}
+                            className="flex items-center justify-center py-2 rounded-lg text-xs font-medium bg-shim-card border border-shim-border text-shim-textD hover:border-shim-primary hover:text-shim-accent transition-all">
+                            {ep}
+                          </Link>
                         ))}
                       </div>
-                    )}
-                  </>
-                )}
-              </div>
+                    </div>
+                  ):(
+                    <>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-5">
+                        {pagedEps.map(ep=>(
+                          <Link key={ep.mal_id} href={`/watch/${anime.mal_id}?ep=${ep.mal_id}`}
+                            className="group flex items-center gap-3 p-3 rounded-xl bg-shim-card border border-shim-border hover:border-shim-primary/50 hover:bg-shim-cardH transition-all">
+                            <div className="w-8 h-8 rounded-lg bg-shim-bgalt flex items-center justify-center text-xs font-bold text-shim-textD group-hover:bg-shim-primary group-hover:text-white transition-all flex-shrink-0">{ep.mal_id}</div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-medium text-shim-text group-hover:text-shim-accent transition-colors clamp2">{ep.title||`Episode ${ep.mal_id}`}</p>
+                              {ep.aired&&<p className="text-xs text-shim-muted">{new Date(ep.aired).toLocaleDateString()}</p>}
+                            </div>
+                            {!isPremium&&ep.mal_id>3&&<span className="text-shim-gold text-xs flex-shrink-0">⭐</span>}
+                          </Link>
+                        ))}
+                      </div>
+                      {totalEpPg>1&&(
+                        <div className="flex gap-2 flex-wrap">
+                          {Array.from({length:totalEpPg},(_,i)=>(
+                            <button key={i} onClick={()=>setEpPage(i+1)}
+                              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${epPage===i+1?'bg-shim-primary text-white':'bg-shim-card border border-shim-border text-shim-textD hover:border-shim-primary/40'}`}>
+                              {i*EPP+1}–{Math.min((i+1)*EPP,episodes.length)}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              </>
             )}
 
             {/* Characters */}

@@ -1,0 +1,271 @@
+'use client'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import Navbar from '@/components/Navbar'
+import { useAuth } from '@/context/AuthContext'
+import { getAllProfiles, grantPremium, revokePremium, makeAdmin, banUser, unbanUser, postAnnouncement, getAnnouncements, removeAnnouncement, postNews, getNews, deleteNews } from '@/lib/db'
+import toast from 'react-hot-toast'
+
+const TABS = ['Overview','Users','Announcements','News']
+
+const Badge = ({role,banned}) => {
+  if (banned) return <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-500/20 border border-red-500/30 text-red-400">Banned</span>
+  if (role==='admin')   return <span className="text-[10px] px-2 py-0.5 rounded-full bg-shim-gold/20 border border-shim-gold/30 text-shim-gold">Admin</span>
+  if (role==='premium') return <span className="text-[10px] px-2 py-0.5 rounded-full bg-shim-primary/20 border border-shim-primary/30 text-shim-accent">Premium</span>
+  return <span className="text-[10px] px-2 py-0.5 rounded-full bg-shim-bgalt border border-shim-border text-shim-muted">Free</span>
+}
+
+const Btn = ({label,color,busy,onClick}) => {
+  const colors = {
+    gold:'border-shim-gold/50 text-shim-gold hover:bg-shim-gold/10',
+    pink:'border-shim-primary/50 text-shim-primary hover:bg-shim-primary/10',
+    red:'border-red-500/50 text-red-400 hover:bg-red-500/10',
+    green:'border-green-500/50 text-green-400 hover:bg-green-500/10',
+    gray:'border-shim-border text-shim-textD hover:text-shim-text',
+  }
+  return (
+    <button onClick={onClick} disabled={busy} className={`px-3 py-1.5 rounded-lg border text-xs font-medium transition-all disabled:opacity-50 cursor-pointer ${colors[color]}`}>
+      {busy?'...':label}
+    </button>
+  )
+}
+
+export default function AdminPage() {
+  const { user, profile, isAdmin, loading } = useAuth()
+  const router = useRouter()
+  const [tab,    setTab]    = useState('Overview')
+  const [users,  setUsers]  = useState([])
+  const [anns,   setAnns]   = useState([])
+  const [news,   setNews]   = useState([])
+  const [search, setSearch] = useState('')
+  const [busy,   setBusy]   = useState(null)
+  const [uLoad,  setULoad]  = useState(false)
+  const [annForm,setAnnForm]= useState({title:'',message:''})
+  const [newsForm,setNewsForm]=useState({title:'',content:'',image_url:'',category:'General'})
+
+  useEffect(()=>{ if (!loading&&(!user||!isAdmin)) { toast.error('Admins only'); router.push('/') } },[user,isAdmin,loading])
+  useEffect(()=>{ if (isAdmin) { load(); loadAnns(); loadNews() } },[isAdmin])
+
+  const load = async () => { setULoad(true); setUsers(await getAllProfiles().catch(()=>[])); setULoad(false) }
+  const loadAnns = async () => setAnns(await getAnnouncements().catch(()=>[]))
+  const loadNews = async () => setNews(await getNews().catch(()=>[]))
+
+  const act = async (action, uid, label) => {
+    setBusy(uid+action)
+    try {
+      if (action==='grant')  await grantPremium(uid)
+      if (action==='revoke') await revokePremium(uid)
+      if (action==='admin')  await makeAdmin(uid)
+      if (action==='ban')    await banUser(uid)
+      if (action==='unban')  await unbanUser(uid)
+      toast.success(label+' ✓'); await load()
+    } catch { toast.error('Failed') }
+    setBusy(null)
+  }
+
+  const submitAnn = async () => {
+    if (!annForm.title||!annForm.message) { toast.error('Fill all fields'); return }
+    await postAnnouncement(annForm.title, annForm.message, profile?.display_name||'Admin')
+    toast.success('Announcement posted!'); setAnnForm({title:'',message:''}); loadAnns()
+  }
+
+  const submitNews = async () => {
+    if (!newsForm.title||!newsForm.content) { toast.error('Fill title and content'); return }
+    await postNews({...newsForm, author: profile?.display_name||'Admin'})
+    toast.success('Article published!'); setNewsForm({title:'',content:'',image_url:'',category:'General'}); loadNews()
+  }
+
+  const filtered = users.filter(u =>
+    u.email?.toLowerCase().includes(search.toLowerCase()) ||
+    u.display_name?.toLowerCase().includes(search.toLowerCase())
+  )
+  const stats = {
+    total:   users.length,
+    premium: users.filter(u=>u.role==='premium').length,
+    admin:   users.filter(u=>u.role==='admin').length,
+    banned:  users.filter(u=>u.banned).length,
+    free:    users.filter(u=>u.role==='free'&&!u.banned).length,
+  }
+
+  if (loading||!isAdmin) return <div className="min-h-screen bg-shim-bg flex items-center justify-center"><div className="w-10 h-10 border-2 border-shim-primary border-t-transparent rounded-full animate-spin"/></div>
+
+  return (
+    <div className="min-h-screen bg-shim-bg">
+      <Navbar/>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-24 pb-16">
+
+        {/* Header */}
+        <div className="flex items-center gap-4 mb-8">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-shim-gold to-shim-primary flex items-center justify-center text-xl">👑</div>
+          <div>
+            <h1 className="text-2xl font-bold text-shim-text">Admin Dashboard</h1>
+            <p className="text-shim-muted text-sm">管理者パネル — Full Control</p>
+          </div>
+          <div className="ml-auto px-4 py-2 rounded-xl border border-shim-gold/30 text-shim-gold text-sm">{profile?.display_name}</div>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex gap-1 mb-8 border-b border-shim-border overflow-x-auto">
+          {TABS.map(t=>(
+            <button key={t} onClick={()=>setTab(t)}
+              className={`flex-shrink-0 px-5 py-3 text-sm font-medium transition-all border-b-2 -mb-px ${tab===t?'border-shim-gold text-shim-gold':'border-transparent text-shim-textD hover:text-shim-text'}`}>
+              {t}
+            </button>
+          ))}
+        </div>
+
+        {/* ── OVERVIEW ── */}
+        {tab==='Overview'&&(
+          <div className="space-y-8">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+              {[
+                {l:'Total Users', v:stats.total,   c:'text-shim-text',    i:'👥'},
+                {l:'Free',        v:stats.free,    c:'text-shim-textD',   i:'🆓'},
+                {l:'Premium',     v:stats.premium, c:'text-shim-gold',    i:'⭐'},
+                {l:'Admins',      v:stats.admin,   c:'text-shim-primary', i:'👑'},
+                {l:'Banned',      v:stats.banned,  c:'text-red-400',      i:'🚫'},
+              ].map(s=>(
+                <div key={s.l} className="bg-shim-card border border-shim-border rounded-2xl p-5 text-center">
+                  <div className="text-2xl mb-2">{s.i}</div>
+                  <div className={`text-3xl font-bold ${s.c} mb-1`}>{s.v}</div>
+                  <div className="text-xs text-shim-muted">{s.l}</div>
+                </div>
+              ))}
+            </div>
+            <div>
+              <h2 className="text-base font-semibold text-shim-text mb-4">Recent Users</h2>
+              <div className="space-y-2">
+                {users.slice(0,5).map(u=>(
+                  <div key={u.id} className="flex items-center gap-3 p-4 bg-shim-card border border-shim-border rounded-xl">
+                    <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 ${u.role==='admin'?'bg-shim-gold/20 text-shim-gold':u.role==='premium'?'bg-shim-primary/20 text-shim-accent':'bg-shim-bgalt text-shim-textD'}`}>
+                      {u.display_name?.[0]?.toUpperCase()||'U'}
+                    </div>
+                    <div className="flex-1 min-w-0"><p className="text-sm font-medium text-shim-text">{u.display_name}</p><p className="text-xs text-shim-muted truncate">{u.email}</p></div>
+                    <Badge role={u.role} banned={u.banned}/>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── USERS ── */}
+        {tab==='Users'&&(
+          <div>
+            <div className="flex gap-3 mb-6">
+              <div className="relative flex-1">
+                <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-shim-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <input type="text" value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search name or email..." className="input-base pl-10"/>
+              </div>
+              <button onClick={load} className="btn-ghost px-4">↻ Refresh</button>
+            </div>
+            {uLoad?(
+              <div className="flex justify-center py-12"><div className="w-8 h-8 border-2 border-shim-primary border-t-transparent rounded-full animate-spin"/></div>
+            ):(
+              <div className="space-y-3">
+                {filtered.map(u=>(
+                  <div key={u.id} className={`p-4 rounded-2xl border transition-all ${u.banned?'border-red-500/30 bg-red-500/5':'border-shim-border bg-shim-card'}`}>
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold flex-shrink-0 ${u.role==='admin'?'bg-shim-gold/20 text-shim-gold':u.role==='premium'?'bg-shim-primary/20 text-shim-accent':'bg-shim-bgalt text-shim-textD'}`}>
+                          {u.display_name?.[0]?.toUpperCase()||'U'}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap"><p className="text-sm font-semibold text-shim-text">{u.display_name}</p><Badge role={u.role} banned={u.banned}/></div>
+                          <p className="text-xs text-shim-muted truncate">{u.email}</p>
+                        </div>
+                      </div>
+                      {u.role!=='admin'&&(
+                        <div className="flex flex-wrap gap-2">
+                          {u.role==='free'
+                            ? <Btn label="Grant Premium" color="gold"  busy={busy===u.id+'grant'}  onClick={()=>act('grant',u.id,'Premium granted')}/>
+                            : <Btn label="Revoke Premium" color="gray" busy={busy===u.id+'revoke'} onClick={()=>act('revoke',u.id,'Premium revoked')}/>}
+                          <Btn label="Make Admin" color="pink" busy={busy===u.id+'admin'} onClick={()=>{if(window.confirm(`Make ${u.display_name} admin?`))act('admin',u.id,'Admin assigned')}}/>
+                          {u.banned
+                            ? <Btn label="Unban"     color="green" busy={busy===u.id+'unban'} onClick={()=>act('unban',u.id,'User unbanned')}/>
+                            : <Btn label="Ban User"  color="red"   busy={busy===u.id+'ban'}   onClick={()=>{if(window.confirm(`Ban ${u.display_name}?`))act('ban',u.id,'User banned')}}/>}
+                        </div>
+                      )}
+                      {u.role==='admin'&&<span className="text-xs text-shim-gold px-3 py-1.5 rounded-lg border border-shim-gold/30">Admin — No actions</span>}
+                    </div>
+                  </div>
+                ))}
+                {filtered.length===0&&<div className="text-center py-12 text-shim-muted">No users found</div>}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── ANNOUNCEMENTS ── */}
+        {tab==='Announcements'&&(
+          <div className="space-y-8">
+            <div className="glass rounded-2xl border border-shim-border p-6">
+              <h2 className="text-base font-semibold text-shim-text mb-5">Post New Announcement</h2>
+              <div className="space-y-4">
+                <div><label className="block text-sm text-shim-textD mb-2">Title</label><input type="text" value={annForm.title} onChange={e=>setAnnForm(f=>({...f,title:e.target.value}))} placeholder="Announcement title..." className="input-base"/></div>
+                <div><label className="block text-sm text-shim-textD mb-2">Message</label><textarea value={annForm.message} onChange={e=>setAnnForm(f=>({...f,message:e.target.value}))} placeholder="Announcement message..." rows={3} className="input-base resize-none"/></div>
+                <button onClick={submitAnn} className="btn-primary">📢 Post Announcement</button>
+              </div>
+            </div>
+            <div>
+              <h2 className="text-base font-semibold text-shim-text mb-4">Active ({anns.length})</h2>
+              {anns.length===0?<p className="text-shim-muted text-sm">No active announcements</p>:(
+                <div className="space-y-3">
+                  {anns.map(a=>(
+                    <div key={a.id} className="p-4 bg-shim-card border border-shim-border rounded-xl flex items-start justify-between gap-4">
+                      <div>
+                        <p className="font-semibold text-shim-text text-sm">{a.title}</p>
+                        <p className="text-shim-textD text-sm mt-1">{a.message}</p>
+                        <p className="text-xs text-shim-muted mt-1">by {a.admin_name}</p>
+                      </div>
+                      <button onClick={()=>removeAnnouncement(a.id).then(loadAnns)} className="text-xs text-red-400 hover:text-red-300 transition-colors flex-shrink-0">Remove</button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ── NEWS ── */}
+        {tab==='News'&&(
+          <div className="space-y-8">
+            <div className="glass rounded-2xl border border-shim-border p-6">
+              <h2 className="text-base font-semibold text-shim-text mb-5">Publish News Article</h2>
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div><label className="block text-sm text-shim-textD mb-2">Title</label><input type="text" value={newsForm.title} onChange={e=>setNewsForm(f=>({...f,title:e.target.value}))} placeholder="Article title..." className="input-base"/></div>
+                  <div><label className="block text-sm text-shim-textD mb-2">Category</label>
+                    <select value={newsForm.category} onChange={e=>setNewsForm(f=>({...f,category:e.target.value}))} className="input-base">
+                      {['General','New Season','Episode Release','Movie','Announcement','Review'].map(c=><option key={c}>{c}</option>)}
+                    </select>
+                  </div>
+                </div>
+                <div><label className="block text-sm text-shim-textD mb-2">Image URL (optional)</label><input type="text" value={newsForm.image_url} onChange={e=>setNewsForm(f=>({...f,image_url:e.target.value}))} placeholder="https://..." className="input-base"/></div>
+                <div><label className="block text-sm text-shim-textD mb-2">Content</label><textarea value={newsForm.content} onChange={e=>setNewsForm(f=>({...f,content:e.target.value}))} placeholder="Article content..." rows={5} className="input-base resize-none"/></div>
+                <button onClick={submitNews} className="btn-primary">📰 Publish Article</button>
+              </div>
+            </div>
+            <div>
+              <h2 className="text-base font-semibold text-shim-text mb-4">Published ({news.length})</h2>
+              <div className="space-y-3">
+                {news.map(n=>(
+                  <div key={n.id} className="flex gap-4 p-4 bg-shim-card border border-shim-border rounded-xl">
+                    {n.image_url&&<img src={n.image_url} alt="" className="w-16 h-16 rounded-lg object-cover flex-shrink-0"/>}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap"><p className="font-semibold text-shim-text text-sm">{n.title}</p><span className="genre-tag">{n.category}</span></div>
+                      <p className="text-shim-textD text-xs clamp2">{n.content}</p>
+                      <p className="text-xs text-shim-muted mt-1">by {n.author} · {new Date(n.created_at).toLocaleDateString()}</p>
+                    </div>
+                    <button onClick={()=>deleteNews(n.id).then(loadNews)} className="text-xs text-red-400 hover:text-red-300 transition-colors flex-shrink-0">Delete</button>
+                  </div>
+                ))}
+                {news.length===0&&<p className="text-shim-muted text-sm">No articles yet</p>}
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
+    </div>
+  )
+}

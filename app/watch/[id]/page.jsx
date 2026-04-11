@@ -100,7 +100,7 @@ useEffect(() => {
                   </div>
                 ) : (
                   <iframe
-                    src={`https://embtaku.pro/streaming.php?id=${id}-episode-${ep}&type=${mode==='dub'?'1':'0'}`}
+                    src={`https://2anime.xyz/embed/${id}-episode-${ep}`}
                     className="w-full h-full" allowFullScreen allow="autoplay; fullscreen" frameBorder="0"
                     title={`${title} Episode ${ep}`}
                   />

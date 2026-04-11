@@ -25,6 +25,13 @@ useEffect(() => {
   const [loading,  setLoading]  = useState(true)
   const [epPage,   setEpPage]   = useState(1)
   const EPP = 50
+  const [server, setServer] = useState(0)
+
+const SERVERS = [
+  { name: 'Server 1', url: (id, ep, mode) => `https://vidsrc.xyz/embed/anime?mal=${id}&ep=${ep}` },
+  { name: 'Server 2', url: (id, ep, mode) => `https://letsembed.cc/anime/${id}/${ep}` },
+  { name: 'Server 3', url: (id, ep, mode) => `https://embtaku.pro/streaming.php?id=${id}-episode-${ep}&type=${mode==='dub'?'1':'0'}` },
+]
 
   useEffect(() => {
     setLoading(true)
@@ -100,7 +107,7 @@ useEffect(() => {
                   </div>
                 ) : (
                   <iframe
-                    src={`https://2anime.xyz/embed/${id}-episode-${ep}`}
+                    src={`https://letsembed.cc/anime/${id}/${ep}?sub=${mode==='sub'?1:0}`}
                     className="w-full h-full" allowFullScreen allow="autoplay; fullscreen" frameBorder="0"
                     title={`${title} Episode ${ep}`}
                   />

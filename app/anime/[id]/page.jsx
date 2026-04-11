@@ -1,6 +1,6 @@
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
-import AnimeDetail from '@/components/AnimeDetail'
+import AnimeDetail from '@/components/AnimeDetail_fixed'
 import { getAnimeById, getEpisodes, getCharacters, getRecommend } from '@/lib/jikan'
 import { notFound } from 'next/navigation'
 

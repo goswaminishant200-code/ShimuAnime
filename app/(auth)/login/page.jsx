@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
 import toast from 'react-hot-toast'
+import { useSearchParams } from 'next/navigation'
 
 const Logo = () => (
   <svg viewBox="0 0 32 32" className="w-10 h-10" fill="none">
@@ -15,10 +16,16 @@ const Logo = () => (
     <circle cx="16" cy="16" r="4" fill="#f4a7bc"/>
   </svg>
 )
-
+{isBanned && (
+  <div className="mb-4 p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm text-center">
+    🚫 You Account has been Baned.You Need To Contact To Admin.
+  </div>
+)}
 export default function LoginPage() {
   const router = useRouter()
   const { login } = useAuth()
+  const searchParams = useSearchParams()
+  const isBanned = searchParams.get('banned') === 'true'
   const [email,    setEmail]    = useState('')
   const [password, setPassword] = useState('')
   const [showPw,   setShowPw]   = useState(false)

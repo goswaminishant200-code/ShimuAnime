@@ -40,19 +40,32 @@ function LoginForm() {
   const [password, setPassword] = useState('')
   const [showPw,   setShowPw]   = useState(false)
   const [loading,  setLoading]  = useState(false)
+  
+const [attempts, setAttempts] = useState(0)
+const [blocked,  setBlocked]  = useState(false)
 
-  const submit = async (e) => {
-    e.preventDefault()
-    if (!email || !password) { toast.error('Fill all fields'); return }
-    setLoading(true)
-    try {
-      await login(email, password)
-      router.push('/')
-    } catch (err) {
-      toast.error(err.message?.includes('Invalid') ? 'Wrong email or password' : err.message || 'Login failed')
+const submit = async (e) => {
+  e.preventDefault()
+  if (blocked) { toast.error('Too many attempts. Wait 5 minutes.'); return }
+  
+  setLoading(true)
+  try {
+    await login(email, password)
+    setAttempts(0)
+    router.push('/')
+  } catch (err) {
+    const newAttempts = attempts + 1
+    setAttempts(newAttempts)
+    if (newAttempts >= 5) {
+      setBlocked(true)
+      toast.error('Too many failed attempts. Blocked for 5 minutes.')
+      setTimeout(() => { setBlocked(false); setAttempts(0) }, 5 * 60 * 1000)
+    } else {
+      toast.error(`Wrong credentials. ${5 - newAttempts} attempts remaining.`)
     }
-    setLoading(false)
   }
+  setLoading(false)
+}
 
   return (
     <div className="min-h-screen bg-shim-bg flex items-center justify-center px-4 relative overflow-hidden">

@@ -5,7 +5,29 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
 import toast from 'react-hot-toast'
 
-const Logo = () => (<svg viewBox="0 0 32 32" className="w-10 h-10" fill="none"><circle cx="16" cy="10" r="5" fill="#c8446a" opacity=".9"/><circle cx="22" cy="16" r="5" fill="#c8446a" opacity=".7"/><circle cx="10" cy="16" r="5" fill="#c8446a" opacity=".7"/><circle cx="20" cy="23" r="5" fill="#c8446a" opacity=".5"/><circle cx="12" cy="23" r="5" fill="#c8446a" opacity=".5"/><circle cx="16" cy="16" r="4" fill="#f4a7bc"/></svg>)
+const Logo = () => (
+  <svg viewBox="0 0 280 280" className="w-10 h-10" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="140" cy="140" r="128" fill="none" stroke="#c8446a" strokeWidth="1" opacity="0.3"/>
+    <ellipse cx="140" cy="88" rx="22" ry="36" fill="#f4a7bc" transform="rotate(0, 140, 140)"/>
+    <ellipse cx="140" cy="88" rx="22" ry="36" fill="#f4a7bc" transform="rotate(72, 140, 140)"/>
+    <ellipse cx="140" cy="88" rx="22" ry="36" fill="#f4a7bc" transform="rotate(144, 140, 140)"/>
+    <ellipse cx="140" cy="88" rx="22" ry="36" fill="#f4a7bc" transform="rotate(216, 140, 140)"/>
+    <ellipse cx="140" cy="88" rx="22" ry="36" fill="#f4a7bc" transform="rotate(288, 140, 140)"/>
+    <line x1="140" y1="140" x2="140" y2="62" stroke="#9b3055" strokeWidth="1" opacity="0.5" transform="rotate(0, 140, 140)"/>
+    <line x1="140" y1="140" x2="140" y2="62" stroke="#9b3055" strokeWidth="1" opacity="0.5" transform="rotate(72, 140, 140)"/>
+    <line x1="140" y1="140" x2="140" y2="62" stroke="#9b3055" strokeWidth="1" opacity="0.5" transform="rotate(144, 140, 140)"/>
+    <line x1="140" y1="140" x2="140" y2="62" stroke="#9b3055" strokeWidth="1" opacity="0.5" transform="rotate(216, 140, 140)"/>
+    <line x1="140" y1="140" x2="140" y2="62" stroke="#9b3055" strokeWidth="1" opacity="0.5" transform="rotate(288, 140, 140)"/>
+    <circle cx="140" cy="140" r="28" fill="#c8446a"/>
+    <circle cx="140" cy="140" r="20" fill="#f4a7bc"/>
+    <circle cx="140" cy="140" r="10" fill="#c8446a"/>
+    <circle cx="140" cy="118" r="3" fill="#e8c97a" transform="rotate(0,140,140)"/>
+    <circle cx="140" cy="118" r="3" fill="#e8c97a" transform="rotate(72,140,140)"/>
+    <circle cx="140" cy="118" r="3" fill="#e8c97a" transform="rotate(144,140,140)"/>
+    <circle cx="140" cy="118" r="3" fill="#e8c97a" transform="rotate(216,140,140)"/>
+    <circle cx="140" cy="118" r="3" fill="#e8c97a" transform="rotate(288,140,140)"/>
+  </svg>
+)
 
 export default function RegisterPage() {
   const router = useRouter()

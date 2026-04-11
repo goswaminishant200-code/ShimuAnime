@@ -116,7 +116,7 @@ function LoginForm() {
         </div>
 
         <p className="text-center text-xs text-shim-muted mt-6">
-          <Link href="/" className="hover:text-shim-textD transition-colors">← Back to ShimuAnime</Link>
+          <Link href="/" className="hover:text-shim-textD transition-colors">← Back to ShimizuAnime</Link>
         </p>
       </div>
     </div>

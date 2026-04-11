@@ -111,7 +111,7 @@ export default function HomePage() {
   }, [hero])
 
   const featured  = hero?.[heroIdx]
-  const title     = featured?.title_english || featured?.title || 'ShimuAnime'
+  const title     = featured?.title_english || featured?.title || 'ShimizuAnime'
   const synopsis  = featured?.synopsis?.slice(0, 220) + '...' || 'Stream thousands of anime free and premium.'
   const image     = featured?.images?.jpg?.large_image_url || ''
   const id        = featured?.mal_id || 1

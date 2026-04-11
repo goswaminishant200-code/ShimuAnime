@@ -49,7 +49,7 @@ export default function RegisterPage() {
       </div>
       <div className="w-full max-w-md relative z-10">
         <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2 mb-4"><Logo/><span className="font-display text-2xl font-bold"><span className="text-shim-primary">Shimu</span><span className="text-shim-text">Anime</span></span></Link>
+          <Link href="/" className="inline-flex items-center gap-2 mb-4"><Logo/><span className="font-display text-2xl font-bold"><span className="text-shim-primary">Shimizu</span><span className="text-shim-text">Anime</span></span></Link>
           <h1 className="text-2xl font-bold text-shim-text">Create Account</h1>
           <p className="text-shim-muted text-sm mt-1 font-jp">アカウントを作成する</p>
         </div>
@@ -86,7 +86,7 @@ export default function RegisterPage() {
           <div className="sakura-div my-6"/>
           <p className="text-center text-sm text-shim-muted">Already have account? <Link href="/login" className="text-shim-primary hover:text-shim-accent font-medium transition-colors">Login</Link></p>
         </div>
-        <p className="text-center text-xs text-shim-muted mt-6"><Link href="/" className="hover:text-shim-textD transition-colors">← Back to ShimuAnime</Link></p>
+        <p className="text-center text-xs text-shim-muted mt-6"><Link href="/" className="hover:text-shim-textD transition-colors">← Back to ShimizuAnime</Link></p>
       </div>
     </div>
   )

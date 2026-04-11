@@ -7,8 +7,8 @@ import { notFound } from 'next/navigation'
 export async function generateMetadata({ params }) {
   try {
     const d = await getAnimeById(params.id)
-    return { title: `${d.data?.title_english||d.data?.title} — ShimuAnime` }
-  } catch { return { title: 'Anime — ShimuAnime' } }
+    return { title: `${d.data?.title_english||d.data?.title} — ShimizuAnime` }
+  } catch { return { title: 'Anime — ShimizuAnime' } }
 }
 
 export default async function AnimePage({ params }) {

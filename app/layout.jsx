@@ -3,7 +3,7 @@ import { Toaster } from 'react-hot-toast'
 import Petals from '@/components/Petals'
 import './globals.css'
 
-export const metadata = { title: 'ShimuAnime — アニメを視聴', description: 'Stream anime free & premium. Sub & Dub.' }
+export const metadata = { title: 'ShimizuAnime — 清水アニメ', description: 'Stream anime Premium. Sub & Dub.' }
 
 export default function RootLayout({ children }) {
   return (

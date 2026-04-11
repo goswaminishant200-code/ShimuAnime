@@ -50,7 +50,7 @@ export default function Navbar() {
         <Link href="/" className="flex items-center gap-2 group">
           <Logo />
           <span className="font-display text-lg font-bold">
-            <span className="text-shim-primary">Shimu</span><span className="text-shim-text">Anime</span>
+            <span className="text-shim-primary">Shimizu</span><span className="text-shim-text">Anime</span>
           </span>
         </Link>
 

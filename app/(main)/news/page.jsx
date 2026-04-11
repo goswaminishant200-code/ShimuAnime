@@ -38,7 +38,7 @@ export default function NewsPage() {
 
         {/* Source tabs */}
         <div className="flex gap-2 mb-6 flex-wrap">
-          {[{k:'all',l:'All News'},{k:'site',l:'Site News'},{k:'mal',l:'MAL News'}].map(t=>(
+          {[{k:'all',l:'All News'},{k:'site',l:'Site News'},{k:'mal',l:'Anime Updates'}].map(t=>(
             <button key={t.k} onClick={()=>setSrc(t.k)}
               className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${src===t.k?'bg-shim-primary text-white shadow-lg shadow-shim-primary/30':'bg-shim-card border border-shim-border text-shim-textD hover:text-shim-text'}`}>
               {t.l}

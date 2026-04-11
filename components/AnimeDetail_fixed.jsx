@@ -223,9 +223,6 @@ export default function AnimeDetail({ anime, episodes, characters, recs }) {
                 <span className="text-2xl font-bold text-shim-gold">{score}</span>
                 <span className="text-shim-muted text-sm">/10</span>
               </div>
-              {anime.rank && <div className="text-shim-textD text-sm">#{anime.rank} <span className="text-shim-muted">Ranked</span></div>}
-              {anime.popularity && <div className="text-shim-textD text-sm">#{anime.popularity} <span className="text-shim-muted">Popular</span></div>}
-              {anime.members && <div className="text-shim-textD text-sm">{(anime.members / 1000).toFixed(0)}K <span className="text-shim-muted">Members</span></div>}
             </div>
 
             {/* Meta grid */}

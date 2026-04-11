@@ -11,7 +11,7 @@ export default function PremiumPage() {
       <Navbar/>
       <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-24 pb-16">
         <div className="text-center mb-14">
-          <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-shim-gold/30 bg-shim-gold/10 text-shim-gold text-sm font-medium mb-6">⭐ ShimuAnime Premium</span>
+          <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-shim-gold/30 bg-shim-gold/10 text-shim-gold text-sm font-medium mb-6">⭐ ShimizuAnime Premium</span>
           <h1 className="text-4xl sm:text-5xl font-bold gradient-text mb-4">Unlock Everything</h1>
           <p className="text-shim-textD text-lg max-w-xl mx-auto">Premium access is granted by our admins. No payment needed — completely free.</p>
           <p className="text-shim-muted font-jp mt-2 text-sm">無制限のアニメを楽しもう</p>
@@ -53,7 +53,7 @@ export default function PremiumPage() {
           <h2 className="text-2xl font-bold text-shim-text mb-8">How to Get Premium</h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             {[
-              {n:'01',title:'Create Account', desc:'Register a free ShimuAnime account',icon:''},
+              {n:'01',title:'Create Account', desc:'Register a free ShimizuAnime account',icon:''},
               {n:'02',title:'Contact Admin',  desc:'Join our Discord or DM an admin',icon:'💬'},
               {n:'03',title:'Get Access',     desc:'Admin reviews and grants premium',icon:'✅'},
             ].map(s=>(

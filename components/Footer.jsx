@@ -13,7 +13,7 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
           <div>
-            <div className="flex items-center gap-2 mb-3"><Logo/><span className="font-display font-bold text-sm"><span className="text-shim-primary">Shimu</span><span className="text-shim-text">Anime</span></span></div>
+            <div className="flex items-center gap-2 mb-3"><Logo/><span className="font-display font-bold text-sm"><span className="text-shim-primary">Shimizu</span><span className="text-shim-text">Anime</span></span></div>
             <p className="text-shim-textD text-xs leading-relaxed">Your gateway to Japanese animation. Free & Premium.</p>
             <p className="text-shim-primary/50 text-xs mt-1 font-jp">アニメの世界へ</p>
           </div>
@@ -34,9 +34,9 @@ export default function Footer() {
         </div>
         <div className="sakura-div mb-5"/>
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-shim-muted">
-          <p>© {new Date().getFullYear()} ShimuAnime. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} ShimizuAnime. All rights reserved.</p>
           <p className="font-jp text-shim-primary/40">桜のように美しく</p>
-          <p>Powered by Jikan API • Not affiliated with any studio</p>
+          <p>© {new Date().getFullYear()} ShimizuAnime</p>
         </div>
       </div>
     </footer>

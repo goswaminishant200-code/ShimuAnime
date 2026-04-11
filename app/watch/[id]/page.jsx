@@ -7,28 +7,28 @@ import { useAuth } from '@/context/AuthContext'
 
 const SERVERS = [
   {
-    name: 'Server 1',
+    name: 'VidPlus',
+    label: 'BEST',
+    getUrl: (id, ep, mode) =>
+      `https://player.vidplus.to/embed/anime/${id}/${ep}?dub=${mode === 'dub' ? 'true' : 'false'}&primarycolor=c8446a&secondarycolor=9b3055`,
+  },
+  {
+    name: 'VidSrc',
     label: 'HD',
     getUrl: (id, ep, mode) =>
-      `https://vidsrc.xyz/embed/anime?mal=${id}&ep=${ep}&ds_lang=${mode === 'dub' ? 'en' : 'ja'}`,
+      `https://vidsrc.xyz/embed/anime?mal=${id}&ep=${ep}`,
   },
   {
-    name: 'Server 2',
-    label: 'HD+',
+    name: 'Embed',
+    label: 'MULTI',
     getUrl: (id, ep, mode) =>
-      `https://vidsrc.to/embed/anime/${id}/${ep}`,
+      `https://www.2embed.stream/embed/anime/${id}/${ep}`,
   },
   {
-    name: 'Server 3',
+    name: 'Backup',
     label: 'SUB',
     getUrl: (id, ep, mode) =>
       `https://embtaku.pro/streaming.php?id=${id}-episode-${ep}&type=${mode === 'dub' ? '1' : '0'}`,
-  },
-  {
-    name: 'Server 4',
-    label: 'MULTI',
-    getUrl: (id, ep, mode) =>
-      `https://vidsrc.me/embed/anime?mal=${id}&ep=${ep}`,
   },
 ]
 

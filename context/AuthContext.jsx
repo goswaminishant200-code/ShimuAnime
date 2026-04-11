@@ -1,7 +1,6 @@
 'use client'
 import { createContext, useContext, useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import { getProfile, registerUser, loginUser, logoutUser } from '@/lib/db'
 import toast from 'react-hot-toast'
 
 const Ctx = createContext(null)
@@ -11,37 +10,78 @@ export function AuthProvider({ children }) {
   const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(true)
 
-const loadProfile = async (uid) => {
-  try {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', uid)
-      .single()
-    if (error) { console.error('Profile fetch error:', error); return }
-    if (data?.banned) {
-      await supabase.auth.signOut()
-      setUser(null)
-      setProfile(null)
-      return
+  const loadProfile = async (uid) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', uid)
+        .single()
+      if (error) { console.error('Profile error:', error); setLoading(false); return }
+      if (data?.banned) {
+        await supabase.auth.signOut()
+        setUser(null); setProfile(null); setLoading(false)
+        return
+      }
+      setProfile(data)
+    } catch(e) {
+      console.error('loadProfile error:', e)
+    } finally {
+      setLoading(false)
     }
-    setProfile(data)
-  } catch(e) {
-    console.error('loadProfile exception:', e)
   }
-}
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      const u = data.session?.user ?? null
+      setUser(u)
+      if (u) loadProfile(u.id)
+      else setLoading(false)
+    })
+
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      const u = session?.user ?? null
+      setUser(u)
+      if (u) loadProfile(u.id)
+      else { setProfile(null); setLoading(false) }
+    })
+    return () => sub.subscription.unsubscribe()
+  }, [])
 
   const register = async (email, password, displayName) => {
-    await registerUser(email, password, displayName)
-    toast.success('Account created! Verify your email.')
+    const { data, error } = await supabase.auth.signUp({
+      email, password,
+      options: { data: { display_name: displayName } }
+    })
+    if (error) throw error
+    if (data.user) {
+      await supabase.from('profiles').upsert({
+        id: data.user.id,
+        email,
+        display_name: displayName,
+        role: 'free',
+        banned: false,
+        bio: '',
+        photo_url: '',
+        mal_link: '',
+        anilist_link: ''
+      })
+    }
+    toast.success('Account created!')
+    return data
   }
+
   const login = async (email, password) => {
-    await loginUser(email, password)
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+    if (error) throw error
     toast.success('Welcome! ようこそ')
+    return data
   }
+
   const logout = async () => {
-    await logoutUser(); setUser(null); setProfile(null)
-    toast.success('Logged out. さようなら!')
+    await supabase.auth.signOut()
+    setUser(null); setProfile(null)
+    toast.success('Logged out!')
   }
 
   const isAdmin   = profile?.role === 'admin'
@@ -53,4 +93,5 @@ const loadProfile = async (uid) => {
     </Ctx.Provider>
   )
 }
+
 export const useAuth = () => useContext(Ctx)
